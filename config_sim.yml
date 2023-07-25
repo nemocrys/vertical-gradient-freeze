@@ -1,0 +1,8 @@
+# simulation configuration
+heater_power:
+  heater_side_bot: 00.0  # W
+  heater_side_mid: 00.0  # W
+  heater_side_top: 100.0  # W
+  heater_top: 100.0  # W
+
+T_ambient: 300  # K

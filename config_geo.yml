@@ -1,0 +1,81 @@
+# geometry parameters
+base_plate:
+  r: 0.165
+  t: 0.01
+  mesh_size: 0.01
+  material: steel
+
+insulation_bot:
+  r: 0.1
+  h: 0.12
+  y0: 0.002
+  mesh_size: 0.01
+  material: insulation
+
+crucible:
+  t_bot: 0.03
+  angle: 120  # deg, opening angle of cone at crucible bottom
+  r_in: 0.075
+  r_out: 0.1
+  h: 0.328
+  mesh_size: 0.01
+  material: graphite
+
+crystal:
+  h: 0.01
+  mesh_size: 0.01
+  material: GaAs_solid
+
+melt:
+  h: 0.2  # melt + crystal height must be lower / equal crucible (h - t_bot)
+  mesh_size: 0.01
+  material: GaAs_liquid
+
+enclosure:
+  r_in: 0.102
+  h_in: 0.5
+  t: 0.002
+  mesh_size: 0.01
+  material: steel
+
+heater_side_bot:
+  r_in: 0.107
+  dy: 0.15
+  dx: 0.004
+  y0: 0.047
+  mesh_size: 0.01
+  material: graphite
+
+heater_side_mid:
+  r_in: 0.107
+  dy: 0.15
+  dx: 0.004
+  y0: 0.201
+  mesh_size: 0.01
+  material: graphite
+
+heater_side_top:
+  r_in: 0.107
+  dy: 0.15
+  dx: 0.004
+  y0: 0.355
+  mesh_size: 0.01
+  material: graphite
+
+heater_top:
+  r_in: 0.0
+  dx: 0.1
+  dy: 0.004
+  y0: 0.507
+  mesh_size: 0.01
+  material: graphite
+
+insulation:
+  r_in: 0.113
+  h_in: 0.513
+  t: 0.052
+  mesh_size: 0.01
+  material: insulation
+
+mesh:
+  size_factor: 0.5
