@@ -3,8 +3,9 @@ axisymmetric_steady:
   Max Output Level: 4
   Coordinate System: Axi Symmetric
   Simulation Type: Steady state
-  Steady State Max Iterations: 1  # no coupling, just one required
+  Steady State Max Iterations: 10
   Output File: case.result
+  Output Intervals: 0
 
 HeatSolver:
   Equation: Heat Equation
@@ -40,4 +41,13 @@ SteadyPhaseChange:
   Procedure: '"SteadyPhaseChange" "SteadyPhaseChange"'
   Triple Point Fixed: Logical True
   Linear System Iterative Method: Idrs
-  Internal Mesh Movement: Logical True
+  # Internal Mesh Movement: Logical True
+MeshUpdate:
+  Equation: Mesh Update
+  Linear System Solver: Iterative
+  Linear System Iterative Method: BiCGStab
+  Linear System Preconditioning: ILU1
+  Linear System Max Iterations: 10000
+  Linear System Convergence Tolerance: 1e-09
+  Linear System Residual Output: 1
+  Steady State Convergence Tolerance: 1e-06

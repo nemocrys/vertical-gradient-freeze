@@ -20,16 +20,19 @@ crucible:
   h: 0.328
   mesh_size: 0.01
   material: graphite
+  T_init: 1000  # guessed temperature
 
 crystal:
   h: 0.01
   mesh_size: 0.01
   material: GaAs_solid
+  T_init: 1000
 
 melt:
   h: 0.2  # melt + crystal height must be lower / equal crucible (h - t_bot)
   mesh_size: 0.01
   material: GaAs_liquid
+  T_init: 1000
 
 enclosure:
   r_in: 0.102
@@ -45,6 +48,7 @@ heater_side_bot:
   y0: 0.047
   mesh_size: 0.01
   material: graphite
+  T_init: 1000
 
 heater_side_mid:
   r_in: 0.107
@@ -53,6 +57,7 @@ heater_side_mid:
   y0: 0.201
   mesh_size: 0.01
   material: graphite
+  T_init: 1000
 
 heater_side_top:
   r_in: 0.107
@@ -61,6 +66,7 @@ heater_side_top:
   y0: 0.355
   mesh_size: 0.01
   material: graphite
+  T_init: 1000
 
 heater_top:
   r_in: 0.0
@@ -69,6 +75,7 @@ heater_top:
   y0: 0.507
   mesh_size: 0.01
   material: graphite
+  T_init: 1000
 
 insulation:
   r_in: 0.113

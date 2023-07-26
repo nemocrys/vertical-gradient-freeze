@@ -1,5 +1,5 @@
 # simulation configuration
-heater_power:
+heating:
   heater_side_bot: 00.0  # W
   heater_side_mid: 00.0  # W
   heater_side_top: 100.0  # W

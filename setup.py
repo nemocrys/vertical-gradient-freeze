@@ -5,6 +5,8 @@ import gmsh
 import yaml
 
 from pyelmer import elmerkw as elmer
+from opencgs.setup import ElmerSetupCz
+
 
 occ = gmsh.model.occ
 
@@ -73,6 +75,7 @@ def geometry(config, sim_dir="./simdata", visualize=False):
     )
     crucible.mesh_size = config["crucible"]["mesh_size"]
     crucible.params.material = config["crucible"]["material"]
+    crucible.params.T_init = config["crucible"]["T_init"]
     crucible_y_in = insulation_bot_y_top + config["crucible"]["t_bot"]
     crucible_h_cone = config["crucible"]["r_in"] / np.tan(
         np.deg2rad(config["crucible"]["angle"] / 2)
@@ -108,6 +111,7 @@ def geometry(config, sim_dir="./simdata", visualize=False):
     )
     crystal.mesh_size = config["crystal"]["mesh_size"]
     crystal.params.material = config["crystal"]["material"]
+    crystal.params.T_init = config["crystal"]["T_init"]
     crystal_y_top = crucible_y_in + config["crystal"]["h"]
     points = [
         occ.add_point(0, crucible_y_in, 0),
@@ -141,6 +145,7 @@ def geometry(config, sim_dir="./simdata", visualize=False):
     )  # we re-use the part that we used to cut the hole into the crucible
     melt.mesh_size = config["melt"]["mesh_size"]
     melt.params.material = config["melt"]["material"]
+    melt.params.T_init = config["melt"]["T_init"]
     occ.cut(melt.dimtags, crystal.dimtags, removeTool=False)
     cutbox = occ.add_rectangle(
         0,
@@ -196,6 +201,7 @@ def geometry(config, sim_dir="./simdata", visualize=False):
         )
         heater.mesh_size = config[htr]["mesh_size"]
         heater.params.material = config[htr]["material"]
+        heater.params.T_init = config[htr]["T_init"]
         heaters.append(heater)
 
     # insulation
@@ -274,6 +280,46 @@ def geometry(config, sim_dir="./simdata", visualize=False):
         "bnd_insulation_outside",
         [insulation.right_boundary, insulation.top_boundary],
     )
+
+    # extract interfaces (not all are required but gives much better visualization in ParaView)
+    if_crucible_melt = Shape(
+        model,
+        1,
+        "if_crucible_melt",
+        crucible.get_interface(melt),
+    )
+    if_crucible_crystal = Shape(
+        model,
+        1,
+        "if_crucible_crystal",
+        crucible.get_interface(crystal),
+    )
+    if_crucible_insbot = Shape(
+        model,
+        1,
+        "if_crucible_insbot",
+        crucible.get_interface(insulation_bot),
+    )
+    if_insbot_enclosure = Shape(
+        model,
+        1,
+        "if_insbot_enclosure",
+        enclosure.get_interface(insulation_bot),
+    )
+    if_base_enclosure = Shape(
+        model,
+        1,
+        "if_base_enclosure",
+        enclosure.get_interface(base_plate),
+    )
+    if_base_insulation = Shape(
+        model,
+        1,
+        "if_base_insulation",
+        insulation.get_interface(base_plate),
+    )
+
+    # symmetry axis
     symmetry_axis = Shape(model, 1, "symmetry_axis", model.symmetry_axis)
 
     model.remove_shape(atmosphere)
@@ -293,7 +339,7 @@ def geometry(config, sim_dir="./simdata", visualize=False):
 
 
 def simulation_pyelmer(
-    model, config, sim_dir="./simdata", elmer_config_file="config_elmer.yml"
+    model, config, config_mat, sim_dir="./simdata", elmer_config_file="config_elmer.yml"
 ):
     # implementation using pyelmer only
 
@@ -301,8 +347,9 @@ def simulation_pyelmer(
     sim = elmer.load_simulation("axisymmetric_steady", elmer_config_file)
     solver_heat = elmer.load_solver("HeatSolver", sim, elmer_config_file)
     solver_phase_change = elmer.load_solver("SteadyPhaseChange", sim, elmer_config_file)
+    solver_mesh = elmer.load_solver("MeshUpdate", sim, elmer_config_file)
     solver_out = elmer.load_solver("ResultOutputSolver", sim, elmer_config_file)
-    eqn_main = elmer.Equation(sim, "eqn_main", [solver_heat])
+    eqn_main = elmer.Equation(sim, "eqn_main", [solver_heat, solver_mesh])
     eqn_phase_change = elmer.Equation(sim, "eqn_phase_change", [solver_phase_change])
 
     # add crystal
@@ -310,7 +357,9 @@ def simulation_pyelmer(
     material_name = model["crystal"].params.material
     mat = elmer.Material(sim, material_name, config_mat[material_name])
     melting_point = mat.data["Melting Point"]
-    ic = elmer.InitialCondition(sim, "T_crystal", {"Temperature": melting_point})
+    ic = elmer.InitialCondition(
+        sim, "T_crystal", {"Temperature": model["crystal"].params.T_init}
+    )
     crystal.equation = eqn_main
     crystal.material = mat
     crystal.initial_condition = ic
@@ -319,7 +368,9 @@ def simulation_pyelmer(
     melt = elmer.Body(sim, "melt", [model["melt"].ph_id])
     material_name = model["melt"].params.material
     mat = elmer.Material(sim, material_name, config_mat[material_name])
-    ic = elmer.InitialCondition(sim, "T_melt", {"Temperature": melting_point})
+    ic = elmer.InitialCondition(
+        sim, "T_melt", {"Temperature": model["melt"].params.T_init}
+    )
     melt.equation = eqn_main
     melt.material = mat
     melt.initial_condition = ic
@@ -331,17 +382,21 @@ def simulation_pyelmer(
         "heater_side_top",
         "heater_top",
     ]:
-        force = elmer.BodyForce(sim, "force_" + shape, 
+        force = elmer.BodyForce(
+            sim,
+            "force_" + shape,
             {
                 "Heat Source": 1,
-                "Integral Heat Source": config["heater_power"][shape],
+                "Integral Heat Source": config["heating"][shape],
                 "Smart Heater Control": "Logical True",
-            }
+            },
         )
         bdy = elmer.Body(sim, shape, [model[shape].ph_id])
         material_name = model[shape].params.material
         mat = elmer.Material(sim, material_name, config_mat[material_name])
-        ic = elmer.InitialCondition(sim, "T_" + shape, {"Temperature": melting_point})
+        ic = elmer.InitialCondition(
+            sim, "T_" + shape, {"Temperature": model[shape].params.T_init}
+        )
         bdy.equation = eqn_main
         bdy.material = mat
         bdy.body_force = force
@@ -362,8 +417,12 @@ def simulation_pyelmer(
         bdy.material = mat
 
     # setup phase change
-    t0_phase_change = elmer.InitialCondition(sim, "t0_phase_change", {"Temperature": melting_point})
-    melt_crystal_if = elmer.Body(sim, "melt_crystal_if", [model["if_melt_crystal"].ph_id])
+    t0_phase_change = elmer.InitialCondition(
+        sim, "t0_phase_change", {"Temperature": melting_point}
+    )
+    melt_crystal_if = elmer.Body(
+        sim, "melt_crystal_if", [model["if_melt_crystal"].ph_id]
+    )
     melt_crystal_if.equation = eqn_phase_change
     melt_crystal_if.material = crystal.material
     melt_crystal_if.initial_condition = t0_phase_change
@@ -395,6 +454,7 @@ def simulation_pyelmer(
     ]:
         bnd = elmer.Boundary(sim, bnd, [model[bnd].ph_id])
         bnd.radiation = True
+        bnd.mesh_update = [0, 0]
 
     # add outside boundaries
     for bnd in [
@@ -403,14 +463,120 @@ def simulation_pyelmer(
     ]:
         bnd = elmer.Boundary(sim, bnd, [model[bnd].ph_id])
         bnd.fixed_temperature = config["T_ambient"]
+        bnd.mesh_update = [0, 0]
+
+    # add interfaces
+    bnd = elmer.Boundary(sim, "symmetry_axis", [model["symmetry_axis"].ph_id])
+    bnd.mesh_update = [0, None]
+
+    for bnd in [
+        "if_crucible_melt",
+        "if_crucible_crystal",
+        "if_crucible_insbot",
+        "if_insbot_enclosure",
+        "if_base_enclosure",
+        "if_base_insulation",
+    ]:
+        bnd = elmer.Boundary(sim, bnd, [model[bnd].ph_id])
+        bnd.mesh_update = [0, 0]
 
     # write Elmer simulation input file (sif-file)
     sim.write_sif(sim_dir)
 
 
-def simulation_opencgs(config, config_mat, sim_dir="./simdata"):
-    # implementation using opencgs czochralski simulation
-    pass
+def simulation_opencgs(model, config, config_mat, sim_dir="./simdata"):
+    # alternative implementation using opencgs czochralski simulation
+    sim = ElmerSetupCz(
+        sim_dir=sim_dir,
+        heat_control=True,
+        heat_convection=False,
+        phase_change=True,
+        heating_resistance=True,
+        smart_heater={
+            "T": 505,  # melting point Sn
+            "control-point": False,  # if False: use T at melt-crystal interface (triple point)
+            # "x": 0.035,
+            # "y": 0.005,
+            # "z": 0.0,
+        },
+        solver_update={
+            "global": {"Steady State Max Iterations": 10},
+            "all-solvers": {
+                "Linear System Iterative Method": "Idrs",
+                "Linear System Residual Output": 10,
+            },
+        },
+        probes={"seed": [0.0, 0.0]},
+        materials_dict=config_mat,
+    )
+    sim.sim.solvers["ResultOutputSolver"].data.update({"Vtu Part collection": True})
+
+    # add crystal
+    crystal = sim.add_crystal(model["crystal"])
+    crystal.data.update({"name": "crystal"})
+
+    # add heaters
+    for shape in [
+        "heater_side_bot",
+        "heater_side_mid",
+        "heater_side_top",
+        "heater_top",
+    ]:
+        heater = sim.add_resistance_heater(model[shape], config["heating"][shape])
+        heater.data.update({"name": shape})
+
+    # add other bodies
+    for body in [
+        "base_plate",
+        "insulation_bot",
+        "crucible",
+        "melt",
+        "enclosure",
+        "insulation",
+    ]:
+        bdy = sim.add_body(model[body])
+        bdy.data.update({"name": body})
+
+    # phase interface
+    sim.add_phase_interface(model["if_melt_crystal"])
+
+    # add boundaries with surface-to-surface radiation
+    for bnd in [
+        "bnd_baseplate",
+        "bnd_insulation_bot",
+        "bnd_crucible",
+        "bnd_melt",
+        "bnd_enclosure",
+        "bnd_heater_side_bot",
+        "bnd_heater_side_mid",
+        "bnd_heater_side_top",
+        "bnd_heater_top",
+        "bnd_insulation",
+    ]:
+        sim.add_radiation_boundary(model[bnd])
+
+    # add outside boundaries
+    for bnd in [
+        "bnd_baseplate_outside",
+        "bnd_insulation_outside",
+    ]:
+        sim.add_temperature_boundary(model[bnd], config["T_ambient"])
+
+    # interfaces
+    sim.add_interface(
+        model["symmetry_axis"], movement=[0, None]
+    )  # allow deformation in axial direction
+    for interface in [
+        "if_crucible_melt",
+        "if_crucible_crystal",
+        "if_crucible_insbot",
+        "if_insbot_enclosure",
+        "if_base_enclosure",
+        "if_base_insulation",
+    ]:
+        sim.add_interface(model[interface])
+    # export
+    sim.export()
 
 
 if __name__ == "__main__":
@@ -425,7 +591,8 @@ if __name__ == "__main__":
     with open("config_mat.yml") as f:
         config_mat = yaml.safe_load(f)
 
-    simulation_pyelmer(model, config_sim, sim_dir)
+    # simulation_pyelmer(model, config_sim, config_mat, sim_dir)
+    simulation_opencgs(model, config_sim, config_mat, sim_dir)
 
     from pyelmer.execute import run_elmer_solver, run_elmer_grid
     from pyelmer.post import scan_logfile
@@ -436,4 +603,3 @@ if __name__ == "__main__":
     print("Errors:", err)
     print("Warnings:", warn)
     print("Statistics:", stats)
-
