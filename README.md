@@ -108,4 +108,4 @@ Alternatively, pyvista may be used.
 
 [This project](https://nemocrys.github.io/) has received funding from the European Research Council (ERC) under the European Union's Horizon 2020 research and innovation programme (grant agreement No 851768).
 
-<img src="https://github.com/nemocrys/pyelmer/blob/main/EU-ERC.png">
+<img src="https://raw.githubusercontent.com/nemocrys/pyelmer/master/EU-ERC.png">
