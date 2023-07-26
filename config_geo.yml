@@ -1,3 +1,8 @@
+# meshing settings
+mesh:
+  size_factor: 1  # use this to change mesh size globally
+  order: 1  # 2nd order is better if you want to evaluate heat fluxes
+
 # geometry parameters
 base_plate:
   r: 0.165
@@ -18,19 +23,19 @@ crucible:
   r_in: 0.075
   r_out: 0.1
   h: 0.328
-  mesh_size: 0.01
+  mesh_size: 0.005
   material: graphite
   T_init: 1000  # guessed temperature
 
 crystal:
-  h: 0.01
-  mesh_size: 0.01
+  h: 0.2
+  mesh_size: 0.005
   material: GaAs_solid
   T_init: 1000
 
 melt:
-  h: 0.2  # melt + crystal height must be lower / equal crucible (h - t_bot)
-  mesh_size: 0.01
+  h: 0.25  # height of melt in crucible, measured from crucible bottom
+  mesh_size: 0.005
   material: GaAs_liquid
   T_init: 1000
 
@@ -38,7 +43,7 @@ enclosure:
   r_in: 0.102
   h_in: 0.5
   t: 0.002
-  mesh_size: 0.01
+  mesh_size: 0.001
   material: steel
 
 heater_side_bot:
@@ -46,7 +51,7 @@ heater_side_bot:
   dy: 0.15
   dx: 0.004
   y0: 0.047
-  mesh_size: 0.01
+  mesh_size: 0.005
   material: graphite
   T_init: 1000
 
@@ -55,7 +60,7 @@ heater_side_mid:
   dy: 0.15
   dx: 0.004
   y0: 0.201
-  mesh_size: 0.01
+  mesh_size: 0.005
   material: graphite
   T_init: 1000
 
@@ -64,7 +69,7 @@ heater_side_top:
   dy: 0.15
   dx: 0.004
   y0: 0.355
-  mesh_size: 0.01
+  mesh_size: 0.005
   material: graphite
   T_init: 1000
 
@@ -73,7 +78,7 @@ heater_top:
   dx: 0.1
   dy: 0.004
   y0: 0.507
-  mesh_size: 0.01
+  mesh_size: 0.005
   material: graphite
   T_init: 1000
 
@@ -83,6 +88,3 @@ insulation:
   t: 0.052
   mesh_size: 0.01
   material: insulation
-
-mesh:
-  size_factor: 0.5

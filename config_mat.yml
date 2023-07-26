@@ -3,14 +3,14 @@ insulation:
   Density: 220.0
   Emissivity: 0.7
   Heat Conductivity: 0.2
-GaAs_solid:
+GaAs_solid:  # TODO update material parameter
   Density: 7179.0
   Emissivity: 0.064
   Heat Conductivity: 60.0
   Solid: 'Logical True'
   Melting Point: 505
   Latent Heat: 5.96e+4  # J / kg
-GaAs_liquid:
+GaAs_liquid:  # TODO update material parameter
   Density: 6980.0
   Emissivity: 0.064
   Heat Conductivity: 29.0
