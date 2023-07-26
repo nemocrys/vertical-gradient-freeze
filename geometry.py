@@ -8,7 +8,7 @@ import yaml
 occ = gmsh.model.occ
 
 
-def geometry(config, sim_dir="./simdata", name="vgf", visualize=False):
+def geometry(config, sim_dir="./", name="vgf", visualize=False):
     if not os.path.exists(sim_dir):
         os.makedirs(sim_dir)
 
@@ -346,8 +346,8 @@ def geometry(config, sim_dir="./simdata", name="vgf", visualize=False):
 
 
 if __name__ == "__main__":
-    sim_dir = "./simdata"
+    sim_dir = "./"
 
     with open("config_geo.yml") as f:
         config_geo = yaml.safe_load(f)
-    model = geometry(config_geo, sim_dir, visualize=True)
+    model = geometry(config_geo, sim_dir, visualize=False)

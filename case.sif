@@ -1,0 +1,522 @@
+Header
+  CHECK KEYWORDS "Warn"
+  Mesh DB "." "case"
+End
+
+Simulation
+  Max Output Level = 4
+  Coordinate System = Axi Symmetric
+  Simulation Type = Steady state
+  Steady State Max Iterations = 10
+  Output File = case.result
+  Output Intervals = 0
+End
+
+Constants
+  Stefan Boltzmann = 5.6704e-08
+End
+
+! main_equation
+Equation 1
+  Active Solvers(2) = 1 3   ! HeatSolver, MeshUpdate, 
+End
+
+! equation_phase_change
+Equation 2
+  Active Solvers(1) = 2   ! SteadyPhaseChange, 
+End
+
+
+! HeatSolver
+Solver 1
+  Equation = Heat Equation
+  Procedure = "HeatSolve" "HeatSolver"
+  Variable = "Temperature"
+  Variable Dofs = 1
+  Calculate Loads = True
+  Exec Solver = Always
+  Nonlinear System Convergence Tolerance = 1e-05
+  Nonlinear System Max Iterations = 1000
+  Nonlinear System Relaxation Factor = 0.7
+  Steady State Convergence Tolerance = 1e-06
+  Stabilize = True
+  Optimize Bandwidth = True
+  Linear System Solver = Iterative
+  Linear System Iterative Method = Idrs
+  Linear System Max Iterations = 10000
+  Linear System Preconditioning = ILU
+  Linear System Precondition Recompute = 1
+  Linear System Convergence Tolerance = 1e-09
+  Linear System Abort Not Converged = True
+  Linear System Residual Output = 10
+  Smart Heater Control After Tolerance = 0.01
+End
+
+! SteadyPhaseChange
+Solver 2
+  Equation = PhaseSurface
+  Variable = "PhaseSurface"
+  Procedure = "SteadyPhaseChange" "SteadyPhaseChange"
+  Triple Point Fixed = Logical True
+  Linear System Iterative Method = Idrs
+  Linear System Residual Output = 10
+End
+
+! MeshUpdate
+Solver 3
+  Equation = Mesh Update
+  Linear System Solver = Iterative
+  Linear System Iterative Method = BiCGStab
+  Linear System Preconditioning = ILU1
+  Linear System Max Iterations = 10000
+  Linear System Convergence Tolerance = 1e-09
+  Linear System Residual Output = 1
+  Steady State Convergence Tolerance = 1e-06
+End
+
+! probe-scalars
+Solver 4
+  Exec Solver = after saving
+  Procedure = "SaveData" "SaveScalars"
+  Filename = "probes.dat"
+  Output Directory = ./results
+  Exact Coordinates = True
+  Save Coordinates(5,2) = Real 0.0 0.152 \
+    0.109 0.122 \
+    0.109 0.276 \
+    0.109 0.43 \
+    0.0 0.509
+End
+
+! SaveMaterials
+Solver 5
+  Exec Solver = before saving
+  Procedure = File "SaveData" "SaveMaterials"
+  Parameter 1 = String "Heat Conductivity"
+End
+
+! ResultOutputSolver
+Solver 6
+  Exec Solver = after saving
+  Equation = "ResultOutput"
+  Procedure = "ResultOutputSolve" "ResultOutputSolver"
+  VTU Format = True
+  Save Geometry Ids = Logical True
+  Vtu Part collection = True
+End
+
+! SaveLine
+Solver 7
+  Exec Solver = after all
+  Equation = "SaveLine"
+  Procedure = "SaveData" "SaveLine"
+  Filename = "phase-if.dat"
+  Output Directory = ./results
+  Variable 1 = Temperature
+End
+
+
+! GaAs_solid
+Material 1
+  Density = 7179.0
+  Emissivity = 0.064
+  Heat Conductivity = 60.0
+  Solid = Logical True
+  Melting Point = 505
+  Latent Heat = 59600.0
+End
+
+! graphite
+Material 2
+  Density = 1750.0
+  Emissivity = 0.81
+  Heat Conductivity = 105
+End
+
+! steel
+Material 3
+  Density = 7900.0
+  Emissivity = 0.2
+  Heat Conductivity = 15.0
+End
+
+! insulation
+Material 4
+  Density = 220.0
+  Emissivity = 0.7
+  Heat Conductivity = 0.2
+End
+
+! GaAs_liquid
+Material 5
+  Density = 6980.0
+  Emissivity = 0.064
+  Heat Conductivity = 29.0
+  Liquid = Logical True
+End
+
+
+! crystal
+Body 1
+  Target Bodies(1) = 4
+  Equation = 1  ! main_equation
+  Initial Condition = 1  ! T-crystal
+  Material = 1  ! GaAs_solid
+  name = crystal
+End
+
+! heater_side_bot
+Body 2
+  Target Bodies(1) = 7
+  Equation = 1  ! main_equation
+  Initial Condition = 2  ! T-heater_side_bot
+  Material = 2  ! graphite
+  Body Force = 1  ! heating_heater_side_bot
+  name = heater_side_bot
+End
+
+! heater_side_mid
+Body 3
+  Target Bodies(1) = 8
+  Equation = 1  ! main_equation
+  Initial Condition = 3  ! T-heater_side_mid
+  Material = 2  ! graphite
+  Body Force = 2  ! heating_heater_side_mid
+  name = heater_side_mid
+End
+
+! heater_side_top
+Body 4
+  Target Bodies(1) = 9
+  Equation = 1  ! main_equation
+  Initial Condition = 4  ! T-heater_side_top
+  Material = 2  ! graphite
+  Body Force = 3  ! heating_heater_side_top
+  name = heater_side_top
+End
+
+! heater_top
+Body 5
+  Target Bodies(1) = 10
+  Equation = 1  ! main_equation
+  Initial Condition = 5  ! T-heater_top
+  Material = 2  ! graphite
+  Body Force = 4  ! heating_heater_top
+  name = heater_top
+End
+
+! base_plate
+Body 6
+  Target Bodies(1) = 1
+  Equation = 1  ! main_equation
+  Initial Condition = 6  ! T-base_plate
+  Material = 3  ! steel
+  name = base_plate
+End
+
+! insulation_bot
+Body 7
+  Target Bodies(1) = 2
+  Equation = 1  ! main_equation
+  Initial Condition = 7  ! T-insulation_bot
+  Material = 4  ! insulation
+  name = insulation_bot
+End
+
+! crucible
+Body 8
+  Target Bodies(1) = 3
+  Equation = 1  ! main_equation
+  Initial Condition = 8  ! T-crucible
+  Material = 2  ! graphite
+  name = crucible
+End
+
+! melt
+Body 9
+  Target Bodies(1) = 5
+  Equation = 1  ! main_equation
+  Initial Condition = 9  ! T-melt
+  Material = 5  ! GaAs_liquid
+  name = melt
+End
+
+! enclosure
+Body 10
+  Target Bodies(1) = 6
+  Equation = 1  ! main_equation
+  Initial Condition = 10  ! T-enclosure
+  Material = 3  ! steel
+  name = enclosure
+End
+
+! insulation
+Body 11
+  Target Bodies(1) = 11
+  Equation = 1  ! main_equation
+  Initial Condition = 11  ! T-insulation
+  Material = 4  ! insulation
+  name = insulation
+End
+
+! melt_crystal_if
+Body 12
+  Target Bodies(1) = 12
+  Equation = 2  ! equation_phase_change
+  Initial Condition = 12  ! t0_phase_change
+  Material = 1  ! GaAs_solid
+End
+
+
+! if_melt_crystal
+Boundary Condition 1
+  Save Line = Logical True
+  Smart Heater Boundary = Logical True
+  Smart Heater Temperature = 505
+  Phase Change = Logical True
+  Phase Velocity 1 = 0
+  Phase Velocity 2 = 0.0
+  Melting Point = 505
+  Latent Heat = 59600.0
+  Normal Target Body = 1
+  Heat Flux = Variable Coordinate 1
+    Real Procedure "SteadyPhaseChange" "MeltingHeat"
+  Mesh Update 1 = 0
+  Mesh Update 2 = Equals PhaseSurface
+  Body Id = Integer 12
+  Target Boundaries(1) = 12
+End
+
+! bnd_baseplate
+Boundary Condition 2
+  Radiation = Diffuse Gray
+  Mesh Update 1 = 0
+  Mesh Update 2 = 0
+  Target Boundaries(1) = 13
+End
+
+! bnd_insulation_bot
+Boundary Condition 3
+  Radiation = Diffuse Gray
+  Mesh Update 1 = 0
+  Mesh Update 2 = 0
+  Target Boundaries(1) = 14
+End
+
+! bnd_crucible
+Boundary Condition 4
+  Radiation = Diffuse Gray
+  Mesh Update 1 = 0
+  Mesh Update 2 = 0
+  Target Boundaries(1) = 15
+End
+
+! bnd_melt
+Boundary Condition 5
+  Radiation = Diffuse Gray
+  Mesh Update 1 = 0
+  Mesh Update 2 = 0
+  Target Boundaries(1) = 16
+End
+
+! bnd_enclosure
+Boundary Condition 6
+  Radiation = Diffuse Gray
+  Mesh Update 1 = 0
+  Mesh Update 2 = 0
+  Target Boundaries(1) = 17
+End
+
+! bnd_heater_side_bot
+Boundary Condition 7
+  Radiation = Diffuse Gray
+  Mesh Update 1 = 0
+  Mesh Update 2 = 0
+  Target Boundaries(1) = 18
+End
+
+! bnd_heater_side_mid
+Boundary Condition 8
+  Radiation = Diffuse Gray
+  Mesh Update 1 = 0
+  Mesh Update 2 = 0
+  Target Boundaries(1) = 19
+End
+
+! bnd_heater_side_top
+Boundary Condition 9
+  Radiation = Diffuse Gray
+  Mesh Update 1 = 0
+  Mesh Update 2 = 0
+  Target Boundaries(1) = 20
+End
+
+! bnd_heater_top
+Boundary Condition 10
+  Radiation = Diffuse Gray
+  Mesh Update 1 = 0
+  Mesh Update 2 = 0
+  Target Boundaries(1) = 21
+End
+
+! bnd_insulation
+Boundary Condition 11
+  Radiation = Diffuse Gray
+  Mesh Update 1 = 0
+  Mesh Update 2 = 0
+  Target Boundaries(1) = 22
+End
+
+! bnd_baseplate_outside
+Boundary Condition 12
+  Temperature = 300
+  Mesh Update 1 = 0
+  Mesh Update 2 = 0
+  Target Boundaries(1) = 23
+End
+
+! bnd_insulation_outside
+Boundary Condition 13
+  Temperature = 300
+  Mesh Update 1 = 0
+  Mesh Update 2 = 0
+  Target Boundaries(1) = 24
+End
+
+! symmetry_axis
+Boundary Condition 14
+  Mesh Update 1 = 0
+  Target Boundaries(1) = 31
+End
+
+! if_crucible_melt
+Boundary Condition 15
+  Mesh Update 1 = 0
+  Mesh Update 2 = 0
+  Target Boundaries(1) = 25
+End
+
+! if_crucible_crystal
+Boundary Condition 16
+  Mesh Update 1 = 0
+  Mesh Update 2 = 0
+  Target Boundaries(1) = 26
+End
+
+! if_crucible_insbot
+Boundary Condition 17
+  Mesh Update 1 = 0
+  Mesh Update 2 = 0
+  Target Boundaries(1) = 27
+End
+
+! if_insbot_enclosure
+Boundary Condition 18
+  Mesh Update 1 = 0
+  Mesh Update 2 = 0
+  Target Boundaries(1) = 28
+End
+
+! if_base_enclosure
+Boundary Condition 19
+  Mesh Update 1 = 0
+  Mesh Update 2 = 0
+  Target Boundaries(1) = 29
+End
+
+! if_base_insulation
+Boundary Condition 20
+  Mesh Update 1 = 0
+  Mesh Update 2 = 0
+  Target Boundaries(1) = 30
+End
+
+
+! heating_heater_side_bot
+Body Force 1
+  Heat Source = 1
+  Smart Heater Control = Logical True
+End
+
+! heating_heater_side_mid
+Body Force 2
+  Heat Source = 1
+  Smart Heater Control = Logical True
+End
+
+! heating_heater_side_top
+Body Force 3
+  Heat Source = 1
+  Integral Heat Source = 100.0
+  Smart Heater Control = Logical True
+End
+
+! heating_heater_top
+Body Force 4
+  Heat Source = 1
+  Integral Heat Source = 100.0
+  Smart Heater Control = Logical True
+End
+
+
+! T-crystal
+Initial Condition 1
+  Temperature = 1000
+End
+
+! T-heater_side_bot
+Initial Condition 2
+  Temperature = 1000
+End
+
+! T-heater_side_mid
+Initial Condition 3
+  Temperature = 1000
+End
+
+! T-heater_side_top
+Initial Condition 4
+  Temperature = 1000
+End
+
+! T-heater_top
+Initial Condition 5
+  Temperature = 1000
+End
+
+! T-base_plate
+Initial Condition 6
+  Temperature = 0
+End
+
+! T-insulation_bot
+Initial Condition 7
+  Temperature = 0
+End
+
+! T-crucible
+Initial Condition 8
+  Temperature = 1000
+End
+
+! T-melt
+Initial Condition 9
+  Temperature = 1000
+End
+
+! T-enclosure
+Initial Condition 10
+  Temperature = 0
+End
+
+! T-insulation
+Initial Condition 11
+  Temperature = 0
+End
+
+! t0_phase_change
+Initial Condition 12
+  Temperature = 505
+  PhaseSurface = Real 0.0
+End
+
