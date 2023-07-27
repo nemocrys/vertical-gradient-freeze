@@ -11,7 +11,7 @@ If you use this code in your research, please cite our article (available with o
 
 ## Prerequisites
 
-The simulation can be executed either in our opencgs docker container or in a custom python environment.
+The simulation can be executed either in our opencgs docker container or in a custom Python environment.
 
 ### Using Docker
 
@@ -29,7 +29,7 @@ On Linux use:
 docker run -it --rm -v $PWD:/home/workdir -e LOCAL_UID=$(id -u $USER) -e LOCAL_GID=$(id -g $USER) nemocrys/opencgs:v0.3.8 bash
 ```
 
-This will open a docker container in interactive mode and map your working directory into the container. All required software to execute the simulation is provided in the container. Visualization is not possible.
+This will open a docker container in interactive mode and map your working directory into the container. All required software to execute the simulation is provided in the container. Visualization in the Docker container is not possible.
 
 ### Own Python installation
 
@@ -44,13 +44,13 @@ The following setup is recommended:
   - numpy
   - pandas
   - matplotlib
-- Installation of Elmer with ElmerSolver, ElmerGrid, ViewFactors executable available on system path
+- Installation of Elmer with ElmerSolver, ElmerGrid, ViewFactors executable available on the system path
 
 ## Geometry
 
-The geometry parameters are defined in [config_geo.yml](config_geo.yml) and is generated using gmsh (trough objectgmsh interface) in [geometry.py](geometry.py).
+The geometry parameters are defined in [config_geo.yml](config_geo.yml), it is generated using gmsh (trough objectgmsh interface) in [geometry.py](geometry.py).
 
-![Geometry and mesh](mesh.png)
+<img src="mesh.png" alt="Geometry and mesh" width="300"/>
 
 Main dimensions:
 
@@ -65,17 +65,17 @@ Main dimensions:
 
 The main features of the model are
 
-- Heat transfer trough conduction and radiation
+- Heat transfer through conduction and radiation
 - Heater power scaling: the position of the outermost point of the solidification front is fixed, the power of the heaters is scaled so that the melting point temperature is obtained there
 - Phase change: the interface between crystal and melt is shifted into the isothermal of the melting point
 
 Melt flow is not considered in the present setup.
 
-The simulation may be setup in different ways:
+The simulation may be set up in different ways:
 
 - In native Elmer code, the so-called sif-file
-- Using pyelmer, a python interface that helps to write the sif file
-- Using opencgs, a python interface intended for crystal growth simulation that bases on pyelmer and provides several additional features
+- Using pyelmer, a Python interface that helps to write the sif file
+- Using opencgs, a Python interface intended for crystal growth simulation that bases on pyelmer and provides several additional features
 
 ### sif-file
 
@@ -86,17 +86,17 @@ The simulation can be executed directly using [case.sif](case.sif), the native E
 
 ### pyelmer
 
-pyelmer provides an integrated workflow to setup the sif file and execute the simulation in Python. The required solvers are defined in [config_elmer.yml](config_elmer.yml), the material properties (all in SI units) in [config_mat.yml](config_mat.yml). Specific parameters for this simulation, e.g. heater powers, are defined in [config_sim.yml](config_sim.yml).
+pyelmer provides an integrated workflow to set up the sif file and execute the simulation in Python. The required solvers are defined in [config_elmer.yml](config_elmer.yml), and the material properties (all in SI units) in [config_mat.yml](config_mat.yml). Specific parameters for this simulation, e.g. heater powers, are defined in [config_sim.yml](config_sim.yml).
 
 Run [simulation_setup_pyelmer.py](simulation_setup_pyelmer.py) to create the mesh (using geometry.py), the sif-file with pyelmer, run ElmerGrid and ElmerSolver.
 
 ### opencgs
 
-opencgs was established for simulation of Czochralski growth and provides various features that simplify simulation setup and help to perform simulation studies.
+opencgs was established for the simulation of Czochralski growth and provides various features that simplify simulation setup and help to perform simulation studies.
 
 #### Setup
 
-The setup is based on a class that is intended for simulation of Czochralski growth. Nevertheless, most of the features are still available and some complexity of pyelmer is reduced. Instead of the solvers from [config_elmer.yml](config_elmer.yml), solvers defined in opencgs are used.
+The setup is based on a class that is intended for the simulation of Czochralski growth. Nevertheless, most of the features are still available and some complexity of pyelmer is reduced. Instead of the solvers from [config_elmer.yml](config_elmer.yml), solvers defined in opencgs are used.
 
 Material parameters are taken from [config_mat.yml](config_mat.yml); specific parameters for this simulation, e.g. heater powers, are defined in [config_sim.yml](config_sim.yml).
 
@@ -122,9 +122,9 @@ A simulation was performed for a crystal height of 150 mm using 1.6 kW total hea
 - middle side heater: 300 W
 - bottom side heater: 300 W
 
-Simulation takes approx 100s on one CPU (Intel i7-9850H). A concave interface shape is obtained. The resulting temperature distribution is shown here:
+The simulation takes approx 100s on one CPU (Intel i7-9850H). A concave interface shape is obtained.
 
-![Resulting temperature distribution](result.png)
+<img src="result.png" alt="Resulting temperature distribution" width="350"/>
 
 Heater power was scaled in the simulation by 1.72, so the actual power distribution is
 
