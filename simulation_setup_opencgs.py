@@ -16,13 +16,13 @@ def simulation_opencgs(model, config, sim_dir="./simdata", config_mat={}):
         phase_change=True,
         heating_resistance=True,
         smart_heater={
-            "T": 505,  # melting point Sn
+            "T": 1511,  # melting point GaAs
             "control-point": False,  # if False: use T at melt-crystal interface (triple point)
             # "x": 0.035,
             # "y": 0.005,
             # "z": 0.0,
         },
-        solver_update={
+        solver_update={  # some changes to the default opencgs solver settings to make simulation faster
             "global": {"Steady State Max Iterations": 10},
             "all-solvers": {
                 "Linear System Iterative Method": "Idrs",
@@ -38,7 +38,7 @@ def simulation_opencgs(model, config, sim_dir="./simdata", config_mat={}):
             },
         materials_dict=config_mat,
     )
-    sim.sim.solvers["ResultOutputSolver"].data.update({"Vtu Part collection": True})
+    sim.sim.solvers["ResultOutputSolver"].data.update({"Vtu Part collection": True})  # gives nicer output
 
     # add crystal
     crystal = sim.add_crystal(model["crystal"])
@@ -52,7 +52,7 @@ def simulation_opencgs(model, config, sim_dir="./simdata", config_mat={}):
         "heater_top",
     ]:
         heater = sim.add_resistance_heater(model[shape], config["heating"][shape])
-        heater.data.update({"name": shape})
+        heater.data.update({"name": shape})  # gives nicer output
 
     # add other bodies
     for body in [

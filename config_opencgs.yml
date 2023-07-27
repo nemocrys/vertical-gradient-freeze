@@ -1,23 +1,22 @@
 sim_name: vertical-gradient-freeze
 visualize: False
-
-# make changes to definitions in config_geo, config_mat, config_sim here
 # to not overwrite the base parameters unintentionally
-config_update:
-  geometry:
-  #   mesh:
-  #     size_factor: 0.5
-    crystal:
-      h: 0.1
+# make changes to definitions in config_geo, config_mat, config_sim here
+# config_update:
+#   geometry:
+#   #   mesh:
+#   #     size_factor: 0.5
+#     crystal:
+#       h: 0.1
   # materials:
   #   insulation:
   #     Heat Conductivity: 0.3
   # simulation:
   #   heating:
+  #     heater_top: 300.0  # W
+  #     heater_side_top: 300.0  # W
+  #     heater_side_mid: 300.0  # W
   #     heater_side_bot: 0.0  # W
-  #     heater_side_mid: 0.0  # W
-  #     heater_side_top: 100.0  # W
-  #     heater_top: 100.0  # W
 
 
 # Uncomment this for parameter study

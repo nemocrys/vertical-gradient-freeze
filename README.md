@@ -50,7 +50,16 @@ The following setup is recommended:
 
 The geometry parameters are defined in [config_geo.yml](config_geo.yml) and is generated using gmsh (trough objectgmsh interface) in [geometry.py](geometry.py).
 
-[TODO: SCREENSHOT OF MESH]
+![Geometry and mesh](mesh.png)
+
+Main dimensions:
+
+- Crucible inner diameter: 150 mm
+- Crucible inner height: 298 mm
+- Crucible outer diameter: 200 mm
+- Crucible outer height: 328 mm
+- Insulation outer diameter: 330 mm
+- Insulation outer height: 565 mm
 
 ## Simulation
 
@@ -59,6 +68,8 @@ The main features of the model are
 - Heat transfer trough conduction and radiation
 - Heater power scaling: the position of the outermost point of the solidification front is fixed, the power of the heaters is scaled so that the melting point temperature is obtained there
 - Phase change: the interface between crystal and melt is shifted into the isothermal of the melting point
+
+Melt flow is not considered in the present setup.
 
 The simulation may be setup in different ways:
 
@@ -102,7 +113,25 @@ Heat flux computation hasn't been implemented here yet, the corresponding warnin
 ParaView is recommended for visualization. The `case.pvd` file needs to be loaded.
 Alternatively, pyvista may be used.
 
-[TODO ADD RESULTS SCREENSHOT]
+## Results
+
+A simulation was performed for a crystal height of 150 mm using 1.6 kW total heating power with the following distribution:
+
+- top heater: 500 W
+- top side heater: 500 W
+- middle side heater: 300 W
+- bottom side heater: 300 W
+
+Simulation takes approx 100s on one CPU (Intel i7-9850H). A concave interface shape is obtained. The resulting temperature distribution is shown here:
+
+![Resulting temperature distribution](result.png)
+
+Heater power was scaled in the simulation by 1.72, so the actual power distribution is
+
+- top heater: 860 W
+- top side heater: 860 W
+- middle side heater: 516 W
+- bottom side heater: 516 W
 
 ## Acknowledgements
 
