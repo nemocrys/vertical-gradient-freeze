@@ -69,7 +69,7 @@ The main features of the model are
 - Heater power scaling: the position of the outermost point of the solidification front is fixed, the power of the heaters is scaled so that the melting point temperature is obtained there
 - Phase change: the interface between crystal and melt is shifted into the isothermal of the melting point
 
-Melt flow is not considered in the present setup.
+Melt flow is not considered in the present setup; latent heat release is currently not included (both may be added). Further details about the model can be found in the [Elmer Models Manual](https://www.nic.funet.fi/index/elmer/doc/ElmerModelsManual.pdf).
 
 The simulation may be set up in different ways:
 
