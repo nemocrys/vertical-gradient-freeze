@@ -9,6 +9,7 @@ base_plate:
   t: 0.01
   mesh_size: 0.01
   material: steel
+  T_init: 300
 
 insulation_bot:
   r: 0.1
@@ -16,6 +17,7 @@ insulation_bot:
   y0: 0.002
   mesh_size: 0.01
   material: insulation
+  T_init: 1000
 
 crucible:
   t_bot: 0.03
@@ -45,6 +47,7 @@ enclosure:
   t: 0.002
   mesh_size: 0.001
   material: steel
+  T_init: 1600
 
 heater_side_bot:
   r_in: 0.107
@@ -88,3 +91,4 @@ insulation:
   t: 0.052
   mesh_size: 0.01
   material: insulation
+  T_init: 1000

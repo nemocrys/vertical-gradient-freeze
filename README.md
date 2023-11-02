@@ -61,7 +61,7 @@ Main dimensions:
 - Insulation outer diameter: 330 mm
 - Insulation outer height: 565 mm
 
-## Simulation
+## Simulation with heater power input
 
 The main features of the model are
 
@@ -107,6 +107,20 @@ Run [simulation_setup_opencgs.py](simulation_setup_opencgs.py) to create the mes
 To make use of the infrastructure for simulation execution in opencgs use [run_opencgs_simulation.py](run_opencgs_simulation.py). It automatically creates a new directory for each simulation and documents the simulation setup and environment. The simulation setup may be updated without changing the original input files (to avoid unintentional changes) and parameter studies can be performed automatically. The settings for the opencgs simulation are defined in [config_opencgs.yml](config_opencgs.yml).
 
 Heat flux computation hasn't been implemented here yet, the corresponding warnings/errors can be safely ignored.
+
+## Simulation with heater temperature input
+
+As an alternative to the setup described above, heater temperature may be fixed to a given value. To obtain the correct position of the interface between crystal and melt without having a highly distorted mesh, an iteration over several simulations is applied shifting the interface position from simulation to simulation until it matches the melting point temperature by a given tolerance. It is based on the opencgs setup described above.
+
+#### Setup
+
+Material parameters are taken from [config_mat.yml](config_mat.yml); specific parameters for this simulation, e.g. heater temperatures, are defined in [config_sim_fixed_temperature.yml](config_sim_fixed_temperature.yml).
+
+To execute a single simulation, run [simulation_setup_opencgs_fixed_temperature.py](simulation_setup_opencgs_fixed_temperature.py) to create the mesh (using geometry.py), the sif-file with opencgs, run ElmerGrid and ElmerSolver.
+
+#### Execution
+
+To execute the iterative diameter computation, run [run_opencgs_simulation_fixed_temperature.py](run_opencgs_simulation_fixed_temperature.py). It automatically creates a new directory, documents the input and environment, and executes a series of steady state simulations iteratively approaching the shape of the crystal-melt interface. A detailed description of this process at the example of a diameter computation in Czochralski crystal growth can be found in https://doi.org/10.1016/j.jcrysgro.2022.126750. The simulation settings are defined in [config_opencgs_fixed_temperature.yml](config_opencgs_fixed_temperature.yml). Note that the iteration fails if the temperatures are so high that the crucible would be filled with liquid material, or so low that all material would be solid.
 
 ## Visualization
 

@@ -1,0 +1,8 @@
+# simulation configuration
+heating:
+  bnd_heater_top: 1700  # K
+  bnd_heater_side_top: 1600  # K
+  bnd_heater_side_mid: 1500  # K
+  bnd_heater_side_bot: 1400  # K
+
+T_ambient: 300  # K
