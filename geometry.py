@@ -33,6 +33,7 @@ def geometry(config, sim_dir="./", name="vgf", visualize=False):
     base_plate.params.material = config["base_plate"][
         "material"
     ]  # we use "params" to save various values we need later
+    base_plate.params.T_init = config["base_plate"]["T_init"]
 
     # bottom insulation is a rectangle
     insulation_bot = Shape(
@@ -51,6 +52,7 @@ def geometry(config, sim_dir="./", name="vgf", visualize=False):
     )
     insulation_bot.mesh_size = config["insulation_bot"]["mesh_size"]
     insulation_bot.params.material = config["insulation_bot"]["material"]
+    insulation_bot.params.T_init = config["insulation_bot"]["T_init"]
     insulation_bot_y_top = (
         config["insulation_bot"]["y0"] + config["insulation_bot"]["h"]
     )
@@ -170,6 +172,7 @@ def geometry(config, sim_dir="./", name="vgf", visualize=False):
     )
     enclosure.mesh_size = config["enclosure"]["mesh_size"]
     enclosure.params.material = config["enclosure"]["material"]
+    enclosure.params.T_init = config["enclosure"]["T_init"]
     hole = occ.add_rectangle(
         0,
         config["enclosure"]["t"],
@@ -218,6 +221,7 @@ def geometry(config, sim_dir="./", name="vgf", visualize=False):
     )
     insulation.mesh_size = config["insulation"]["mesh_size"]
     insulation.params.material = config["insulation"]["material"]
+    insulation.params.T_init = config["insulation"]["T_init"]
     atmosphere = occ.add_rectangle(
         0, 0, 0, config["insulation"]["r_in"], config["insulation"]["h_in"]
     )  # will be used bellow

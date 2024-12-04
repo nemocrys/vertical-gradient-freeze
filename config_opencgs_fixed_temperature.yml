@@ -1,0 +1,20 @@
+sim_name: test_fixed-T
+T_tp: 1511  # Melting temperature (Triple point temperature in Czochralski simulation)
+dT_max: 0.1 # Maximum allowable temperature difference at phase boundary
+# Range for height of solid phase for iterative computation
+h_min: 0.005  # Very small solid phase, lower limit
+h_max: 0.245  # Very long solid phase, upper limit
+
+# to not overwrite the base parameters unintentionally
+# make changes to definitions in config_geo, config_mat, config_sim here
+# config_update:
+#   geometry:
+#     mesh:
+#       size_factor: 0.5
+
+
+# Uncomment this for parameter study (currently not working)
+# study_params:
+#   geometry:
+#     mesh:
+#       size_factor: [0.5, 1, 2]
